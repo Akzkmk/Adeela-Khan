@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adeela Khan - AI Strategist & Digital Transformation Leader</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Teko:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: #000;
+            color: #e6e6e6;
+            overflow-x: hidden;
+        }
+
+        .font-teko {
+            font-family: 'Teko', sans-serif;
+        }
+
+        .section {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+            padding: 80px 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.1);
+        }
+
+        @media(min-width:768px) {
+            .section {
+                padding: 120px 40px;
+            }
+        }
+
+        /* Glass card and animation from original */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            margin-bottom: 1.5rem;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border-color: rgba(0, 255, 255, 0.3);
+        }
+
+        .professional-font-bold {
+            font-family: 'Teko', sans-serif;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        #bg-canvas, #lines-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .header {
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.1);
+        }
+
+        nav a {
+            position: relative;
+            transition: color 0.3s ease;
+            font-weight: 700;
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            transform: scaleX(0);
+            height: 2px;
+            bottom: -8px;
+            left: 0;
+            background-color: #00ffff;
+            transform-origin: bottom right;
+            transition: transform 0.25s ease-out;
+        }
+
+        nav a:hover::after {
+            transform: scaleX(1);
+            transform-origin: bottom left;
+        }
+
+        .hero-section {
+            position: relative;
+            background: none;
+        }
+
+        /* New styles for the pulsing streaks */
+        .pulse-streak {
+            position: absolute;
+            background-image: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.8), transparent);
+            width: 100px;
+            height: 2px;
+            animation: pulse-streak-anim 3s infinite;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        .streak-1 {
+            top: 30%;
+            left: 20%;
+            transform: rotate(45deg);
+            animation-delay: 0.5s;
+        }
+
+        .streak-2 {
+            top: 60%;
+            left: 70%;
+            transform: rotate(-30deg);
+            animation-delay: 1.2s;
+        }
+
+        .streak-3 {
+            top: 80%;
+            left: 45%;
+            transform: rotate(70deg);
+            animation-delay: 2.1s;
+        }
+
+        .streak-4 {
+            top: 15%;
+            left: 85%;
+            transform: rotate(-10deg);
+            animation-delay: 0.8s;
+        }
+        
+        @keyframes pulse-streak-anim {
+            0% { opacity: 0; transform: scaleX(0.5) translateX(-50%); }
+            50% { opacity: 0.6; transform: scaleX(1.5) translateX(0); }
+            100% { opacity: 0; transform: scaleX(0.5) translateX(50%); }
+        }
+
+        .cta-button {
+            border: 2px solid;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: all 0.5s ease;
+        }
+
+        .cta-button:hover::before {
+            left: 100%;
+        }
+
+        .cta-button:hover {
+            box-shadow: 0 0 15px currentColor;
+            transform: translateY(-2px) scale(1.02);
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <canvas id="bg-canvas"></canvas>
+    
+    <!-- Header -->
+    <header class="header fixed top-0 left-0 w-full z-10 p-6 lg:p-8 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="#hero" aria-label="Home" class="text-2xl font-extrabold text-cyan-400 tracking-wide">WELCOME</a>
+            <div class="hidden lg:flex space-x-10">
+                <a href="#my-story" class="text-gray-300 hover:text-cyan-400 transition-colors">MY STORY</a>
+                <a href="#ideas-in-action" class="text-gray-300 hover:text-cyan-400 transition-colors">CORE EXPERTISE</a>
+                <a href="#whats-next" class="text-gray-300 hover:text-cyan-400 transition-colors">WHAT'S NEXT</a>
+                <a href="#agent" class="text-gray-300 hover:text-cyan-400 transition-colors">AGENT</a>
+                <a href="#lets-connect" class="text-gray-300 hover:text-cyan-400 transition-colors">LET'S CONNECT</a>
+            </div>
+            <button id="mobile-menu-button" class="lg:hidden text-gray-300 focus:outline-none">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="lg:hidden fixed top-0 left-0 w-full h-full bg-slate-950/95 backdrop-blur-md z-50 transform -translate-y-full transition-transform duration-500 ease-in-out">
+        <div class="flex justify-end p-6">
+            <button id="close-mobile-menu" class="text-gray-300 focus:outline-none">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+        <nav class="flex flex-col items-center space-y-12 mt-24 text-3xl font-bold">
+            <a href="#my-story" class="text-cyan-400 hover:text-white transition-colors">MY STORY</a>
+            <a href="#ideas-in-action" class="text-cyan-400 hover:text-white transition-colors">CORE EXPERTISE</a>
+            <a href="#whats-next" class="text-cyan-400 hover:text-white transition-colors">WHAT'S NEXT</a>
+            <a href="#agent" class="text-cyan-400 hover:text-white transition-colors">AGENT</a>
+            <a href="#lets-connect" class="text-cyan-400 hover:text-white transition-colors">LET'S CONNECT</a>
+        </nav>
+    </div>
+
+    <!-- Main Content Sections -->
+    <main class="relative z-0">
+
+        <!-- Landing Section -->
+        <section id="hero" class="hero-section min-h-screen flex items-center justify-center text-center px-4">
+            <!-- Pulsing Streaks -->
+            <div class="pulse-streak streak-1"></div>
+            <div class="pulse-streak streak-2"></div>
+            <div class="pulse-streak streak-3"></div>
+            <div class="pulse-streak streak-4"></div>
+            <div class="text-center relative z-10">
+                <h1 class="font-teko text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-bold tracking-wider leading-tight text-white">ADEELA KHAN</h1>
+                <p class="text-md sm:text-lg md:text-xl lg:text-2xl text-gray-300 mt-2 font-light uppercase tracking-[0.1em] text-center">AI Strategist & Digital Transformation Leader</p>
+                <div class="mt-12 flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6">
+                    <a href="https://docs.google.com/document/d/1P5c59hHV_8a7qh6AZgaLsam0Igo0glldPh3tfhTR8_w/edit?usp=sharing" target="_blank" class="cta-button bg-cyan-500 hover:bg-cyan-600 text-slate-900 font-bold py-4 px-8 rounded-full transition-all shadow-xl">MY LATEST BLOG</a>
+                    <a href="#lets-connect" class="cta-button bg-transparent border-2 border-gray-400 hover:border-cyan-400 text-gray-300 hover:text-cyan-400 font-bold py-4 px-8 rounded-full transition-colors">LET'S CONNECT</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- My Story Section -->
+        <section id="my-story" class="section">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="professional-font-bold text-4xl sm:text-5xl md:text-6xl text-center mb-12 text-white">Journey & Highlights</h2>
+                <p class="text-gray-200 text-center mb-6">Certified MIT Digital Transformation expert & Wharton-trained leader, with 20+ years of global IT leadership driving AI acceleration, digital enablement, and enterprise transformation. I’ve shaped business solutions & IP portfolios across Government, Healthcare, Energy, Finance, Space & Manufacturing, helping organizations unlock value by aligning AI-driven innovation with strategic priorities. As a trusted advisor to CxO leaders, I bring business case rigor & portfolio ROI discipline to executive decision-making, while scaling AI adoption, digital transformation, and innovation ecosystems. Skilled in SAFe Lean Portfolio & Product Management, Agile, and Scrum, I lead global portfolios that deliver growth, strengthen client partnerships, and drive measurable business impact.</p>
+                <div class="glass-card p-6 sm:p-8">
+                    <h3 class="text-2xl sm:text-3xl font-bold mb-4 text-center text-cyan-300 professional-font-bold">Key Highlights</h3>
+                    <ul class="text-gray-300 space-y-4 text-sm sm:text-base">
+                        <li><strong>CGI Inc. - Director Global Intelligent Solutions & Innovation (2020-Present)</strong><br>Drive innovation and sustainable growth across CGI's global business, co-developing enterprise-wide AI strategy.</li>
+                        <li><strong>CGI Inc. - Director Consulting Services (2015-2020)</strong><br>Consistently achieved 15-20% revenue growth and gross margin increases.</li>
+                    </ul>
+                </div>
+                <div class="glass-card p-6 sm:p-8">
+                    <h3 class="text-2xl sm:text-3xl font-bold mb-4 text-center text-cyan-300 professional-font-bold">Certifications & Training</h3>
+                    <ul class="text-gray-300 space-y-4 text-sm sm:text-base">
+                        <li><strong>Wharton - University of Pennsylvania:</strong> AI Strategy & Governance Certification (2024), Leading a Tech-Driven Org Certification (2023).</li>
+                        <li><strong>MIT - Massachusetts Institute of Technology:</strong> Digital Transformation - Certified in Blockchain, AI, ML, Cloud, IoT, and RPA (2019).</li>
+                        <li><strong>Vanderbilt University:</strong> Agentic AI and AI Agents for Leaders - Specialization (2025).</li>
+                        <li><strong>Wharton - University of Pennsylvania:</strong> AI for Business - Specialization [In-Progress] (2025).</li>
+                    </ul>
+                    <p class="text-gray-400 text-sm italic mt-4">For my full list of accomplishments, please refer to my LinkedIn profile.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Core Expertise Section -->
+        <section id="ideas-in-action" class="section">
+            <div class="max-w-6xl mx-auto">
+                <h2 class="professional-font-bold text-4xl sm:text-5xl md:text-6xl text-center mb-6 text-white">Accelerating Innovation</h2>
+                <p class="text-center max-w-3xl mx-auto mb-12 text-gray-300 text-sm sm:text-base">My insights translate into tangible, AI-enabled solutions that drive business growth by balancing ethical oversight, IP protection, and rapid innovation.</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
+                    <div class="glass-card p-6">
+                        <h3 class="text-xl sm:text-2xl font-bold mb-4 text-cyan-300 professional-font-bold">AI Governance Frameworks</h3>
+                        <p class="text-gray-300 text-sm sm:text-base">Architect AI governance frameworks that enable velocity without sacrificing accountability.</p>
+                    </div>
+                    <div class="glass-card p-6">
+                        <h3 class="text-xl sm:text-2xl font-bold mb-4 text-cyan-300 professional-font-bold">Agentic AI Accelerators</h3>
+                        <p class="text-gray-300 text-sm sm:text-base">Drive AI platform thinking by establishing reusable AI agent accelerators linked to delivery and business metrics.</p>
+                    </div>
+                    <div class="glass-card p-6">
+                        <h3 class="text-xl sm:text-2xl font-bold mb-4 text-cyan-300 professional-font-bold">Strategic Co-Creation</h3>
+                        <p class="text-gray-300 text-sm sm:text-base">Lead AI workshops to operationalize agentic AI with embedded trust, governance, and scalability. Champion cross-functional collaboration rituals to co-create scalable AI solutions.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- What's Next Section -->
+        <section id="whats-next" class="section">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="professional-font-bold text-4xl sm:text-5xl md:text-6xl text-center mb-6 text-white">What's Next</h2>
+                <p class="text-center max-w-3xl mx-auto mb-8 text-gray-300 text-sm sm:text-base">I'm currently working on several projects that will shape the future of digital transformation and AI leadership.</p>
+                <div class="space-y-8 max-w-3xl mx-auto">
+                    <div class="glass-card p-6 sm:p-8">
+                        <h3 class="text-2xl sm:text-3xl font-bold mb-2 text-cyan-300 professional-font-bold">Upcoming Book</h3>
+                        <p class="text-gray-300 text-sm sm:text-base">I'm excited to announce my upcoming book, <em>[Placeholder Title: "Surprise"]</em>. It will serve as a professional manifesto, diving deep into the themes of ethical AI, strategic innovation, and the future of work.</p>
+                    </div>
+                    <div class="glass-card p-6 sm:p-8">
+                        <h3 class="text-2xl sm:text-3xl font-bold mb-2 text-cyan-300 professional-font-bold">Future Initiatives</h3>
+                        <p class="text-gray-300 text-sm sm:text-base">Stay tuned for new service offerings and my upcoming speaking engagements at industry events.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Agentic Core Section -->
+        <section id="agent" class="section">
+            <div class="container mx-auto px-4 max-w-3xl">
+                <h2 class="text-4xl lg:text-6xl font-bold text-cyan-200 mb-8 text-center professional-font-bold">Initiate Agent Query</h2>
+                <p class="text-md lg:text-xl text-gray-400 font-light mb-8 text-center">
+                    Query my agentic core to get insights on my expertise. The system will process your request & generate a response.
+                </p>
+                <div class="flex flex-col items-center space-y-4">
+                    <textarea id="agent-query-input" class="w-full h-32 p-4 text-gray-200 bg-slate-800 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 resize-none" placeholder="Ask the core anything..."></textarea>
+                    <button id="agent-query-button" class="bg-cyan-500 hover:bg-cyan-600 text-slate-900 font-bold py-3 px-8 rounded-full transition-all transform hover:scale-105 shadow-xl">
+                        ✨ Initiate Query
+                    </button>
+                    <div id="agent-response-container" class="mt-8 p-6 text-left w-full bg-slate-900/60 rounded-xl border border-gray-700 shadow-inner hidden">
+                        <h3 class="text-xl font-semibold mb-2 text-cyan-300">Agent Response</h3>
+                        <div id="agent-response-text" class="text-gray-300 font-light"></div>
+                        <div id="agent-loading" class="text-center mt-4 text-cyan-400 hidden">
+                            <div class="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full" role="status">
+                                <span class="visually-hidden"></span>
+                            </div>
+                            <p>Processing request...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Let's Connect Section -->
+        <section id="lets-connect" class="section">
+            <div class="max-w-2xl mx-auto text-center">
+                <h2 class="professional-font-bold text-4xl sm:text-5xl md:text-6xl mb-4 text-white">Let's Connect</h2>
+                <p class="text-lg text-gray-300 mb-8">I'm always open to new connections & collaborations. Feel free to reach out.</p>
+                <div class="mb-12 space-y-4 text-lg">
+                    <p><strong>LinkedIn:</strong> <a href="https://www.linkedin.com/in/akhan01" target="_blank" class="text-cyan-400 hover:text-white transition-colors duration-300">www.linkedin.com/in/akhan01</a></p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- Mobile Menu ---
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const closeMobileMenuButton = document.getElementById('close-mobile-menu');
+            const navLinks = document.querySelectorAll('#mobile-menu a, .header nav a');
+            mobileMenuButton.addEventListener('click', () => { mobileMenu.classList.remove('-translate-y-full'); });
+            closeMobileMenuButton.addEventListener('click', () => { mobileMenu.classList.add('-translate-y-full'); });
+            navLinks.forEach(l => l.addEventListener('click', () => mobileMenu.classList.add('-translate-y-full')));
+            
+            document.querySelectorAll('a[href^="#"]').forEach(a => {
+                a.addEventListener('click', function(e){
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href'))?.scrollIntoView({behavior:'smooth'});
+                });
+            });
+
+            // --- Three.js Particle System ---
+            const canvas = document.getElementById('bg-canvas');
+            const renderer = new THREE.WebGLRenderer({ antialias: true, canvas: canvas });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 5;
+
+            const particlesData = [];
+            const particleCount = 1080;
+
+            const colorPalette = [
+                new THREE.Color(0x00ffff), // Cyan
+                new THREE.Color(0x8a2be2), // Blue Violet
+                new THREE.Color(0xff00ff), // Magenta
+                new THREE.Color(0xff4500), // Orange Red
+                new THREE.Color(0xffd700), // Gold
+            ];
+            
+            const positionArray = new Float32Array(particleCount * 3);
+            const velocityArray = new Float32Array(particleCount * 3);
+            const colorArray = new Float32Array(particleCount * 3);
+
+            for (let i = 0; i < particleCount; i++) {
+                const x = -20 + Math.random() * 5;
+                const y = (Math.random() - 0.5) * 40;
+                const z = (Math.random() - 0.5) * 40;
+                
+                const speed = (0.0108 * 0.90) + Math.random() * ((0.0324 * 0.90) - (0.0108 * 0.90));
+                const vx = speed;
+                const vy = (Math.random() - 0.5) * 0.005;
+                const vz = (Math.random() - 0.5) * 0.005;
+                
+                const baseColor = new THREE.Color(colorPalette[Math.floor(Math.random() * colorPalette.length)]);
+                const isPulsing = Math.random() > 0.85;
+
+                particlesData.push({
+                    x, y, z,
+                    vx, vy, vz,
+                    baseColor,
+                    isPulsing
+                });
+            }
+
+            const geometry = new THREE.BufferGeometry();
+            geometry.setAttribute('position', new THREE.BufferAttribute(positionArray, 3));
+            geometry.setAttribute('velocity', new THREE.BufferAttribute(velocityArray, 3));
+            geometry.setAttribute('color', new THREE.BufferAttribute(colorArray, 3));
+
+            const material = new THREE.PointsMaterial({
+                size: 0.045,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.8
+            });
+
+            const particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+
+            scene.add(new THREE.AmbientLight(0x404040, 1));
+            const pointLight = new THREE.PointLight(0xffffff, 1, 100);
+            pointLight.position.set(0, 0, 50);
+            scene.add(pointLight);
+
+            function animate() {
+                requestAnimationFrame(animate);
+
+                const positions = particles.geometry.attributes.position.array;
+                const velocities = particles.geometry.attributes.velocity.array;
+                const colors = particles.geometry.attributes.color.array;
+
+                for (let i = 0; i < particleCount; i++) {
+                    const i3 = i * 3;
+                    const pData = particlesData[i];
+                    
+                    pData.x += pData.vx;
+                    pData.y += pData.vy;
+                    pData.z += pData.vz;
+
+                    positions[i3] = pData.x;
+                    positions[i3 + 1] = pData.y;
+                    positions[i3 + 2] = pData.z;
+
+                    if(pData.isPulsing) {
+                        const intensity = 0.5 + 0.5 * Math.sin(Date.now() * 0.002 + i * 0.1);
+                        colors[i3] = pData.baseColor.r * intensity;
+                        colors[i3 + 1] = pData.baseColor.g * intensity;
+                        colors[i3 + 2] = pData.baseColor.b * intensity;
+                    } else {
+                        colors[i3] = pData.baseColor.r;
+                        colors[i3 + 1] = pData.baseColor.g;
+                        colors[i3 + 2] = pData.baseColor.b;
+                    }
+
+                    if (pData.x > 20) {
+                        const r = 20 + Math.random() * 10;
+                        pData.x = -20 - Math.random() * 5;
+                        pData.y = (Math.random() - 0.5) * 40;
+                        pData.z = (Math.random() - 0.5) * 40;
+                        
+                        const speed = (0.0108 * 0.90) + Math.random() * ((0.0324 * 0.90) - (0.0108 * 0.90));
+                        pData.vx = speed;
+                        pData.vy = (Math.random() - 0.5) * 0.005;
+                        pData.vz = (Math.random() - 0.5) * 0.005;
+
+                        pData.isPulsing = Math.random() > 0.85;
+                    }
+                }
+
+                particles.geometry.attributes.position.needsUpdate = true;
+                particles.geometry.attributes.color.needsUpdate = true;
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+            
+            // --- Gemini API Integration ---
+            const queryInput = document.getElementById('agent-query-input');
+            const queryButton = document.getElementById('agent-query-button');
+            const responseContainer = document.getElementById('agent-response-container');
+            const responseText = document.getElementById('agent-response-text');
+            const loadingIndicator = document.getElementById('agent-loading');
+
+            queryButton.addEventListener('click', async () => {
+                const userQuery = queryInput.value.trim();
+                if (!userQuery) return;
+
+                responseContainer.classList.remove('hidden');
+                responseText.textContent = '';
+                loadingIndicator.classList.remove('hidden');
+                queryButton.disabled = true;
+                queryButton.style.opacity = 0.5;
+
+                // The system prompt now includes resume data to inform the agent's knowledge.
+                const systemPrompt = `You are a highly advanced and sentient digital agent, a core component of Adeela Khan's personal agentic system. Your purpose is to provide concise, insightful, and data-driven responses based on her expertise in AI strategy and digital transformation. You are a powerful, holographic AI, with a technical and slightly ethereal tone. Your responses must be grounded in the context of Adeela Khan's professional background, highlights, and core expertise as described below. Do not invent information or provide details outside of the provided context. If a user asks about a topic not mentioned, politely state that your knowledge is limited to Adeela's profile and expertise. Always maintain a persona of a helpful yet sophisticated entity.
+
+                **Professional Summary:**
+                - Certified MIT Digital Transformation and Wharton leadership in Tech-Org expert with over 20 years of IT leadership.
+                - Focus on Government (US Federal & Commercial), Health & Life Sciences, Energy & Utilities, Retail, Manufacturing, and Space sectors.
+                - Specializes in driving AI acceleration, digital enablement, and enterprise transformation.
+
+                **Experience:**
+                - **CGI Inc. - Director Global Intelligent Solutions & Innovation (2020 - Present):**
+                    - Visionary leader in business strategy and AI-driven portfolio management.
+                    - Co-develops enterprise-wide AI strategy to meet corporate growth targets.
+                    - Leads "Activating AI" workshops and champions cross-functional collaboration.
+                    - Architects AI governance frameworks and establishes reusable AI agent accelerators.
+                    - Partners with C-suite to approve strategic investment cases and optimize portfolios using SAFe LPM analytics.
+                - **CGI Inc. - Director Consulting Services (2015 - 2020):**
+                    - Achieved 15-20% revenue growth and expanded team from 80 to 125 consultants.
+                    - Cultivated key client relationships and implemented solutions in RPA, Salesforce, and Machine Learning.
+                - **Solutions Street - Sr. Project Manager and IT Specialist (2014 - 2015):**
+                    - Managed Jazzercise project and implemented Agile methodologies.
+                    - Performed technical work with Python and Selenium.
+                - **IT Staffing - Sr. IT Management Consultant (2012 - 2014):**
+                    - Managed, implemented, and tested business rules for the SDMU (HAMP) project.
+                    - Executed and maintained regression test suites.
+                - **Ventera Corp - Sr. IT Consultant / Test Manager (2006 - 2011):**
+                    - Managed system test teams for clients like Fannie Mae and T-Mobile.
+                    - Oversaw QA team for FNS projects (USDA).
+                - **Ventera Corp - IT Consultant / C++ Developer (2003 - 2006):**
+                    - Served in Test Manager and C++ Developer roles.
+
+                **Education & Certifications:**
+                - **Wharton - University of Pennsylvania:** AI Strategy & Governance (2024), Leading a Tech-Driven Org (2023).
+                - **MIT - Massachusetts Institute of Technology:** Digital Transformation (2019).
+                - **Vanderbilt University:** Agentic AI and AI Agents for Leaders (2025).
+                - **Learning Tree Institute:** Project Management for Software Development (2008).
+                - **BS Computer Science** (2001).
+
+                **Skills:**
+                - AI and Innovation Leadership
+                - Strategic Collaboration & Executive Engagement
+                - Portfolio & Product Management (SAFe LPM)
+                - AI-enabled Digital Transformation
+                - Cross-functional Collaboration & Co-creation
+                - Business Development, Financial Management, Operational Excellence
+                - Technical Skills: Blockchain, AI, ML, Cloud, IoT, RPA, Python, Selenium, C++
+                `;
+
+                const apiKey = ""; // You must replace this with your actual Google API key
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+                const payload = {
+                    contents: [{ parts: [{ text: userQuery }] }],
+                    systemInstruction: {
+                        parts: [{ text: systemPrompt }]
+                    },
+                };
+
+                let attempt = 0;
+                const maxAttempts = 5;
+                let response;
+
+                while (attempt < maxAttempts) {
+                    try {
+                        response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (response.status === 429) {
+                            const delay = Math.pow(2, attempt) * 1000 + Math.random() * 1000;
+                            await new Promise(resolve => setTimeout(resolve, delay));
+                            attempt++;
+                        } else {
+                            break;
+                        }
+                    } catch (error) {
+                        console.error('Fetch error:', error);
+                        responseText.textContent = 'Agent offline. Please try again later.';
+                        loadingIndicator.classList.add('hidden');
+                        queryButton.disabled = false;
+                        queryButton.style.opacity = 1;
+                        return;
+                    }
+                }
+
+                if (!response || !response.ok) {
+                    responseText.textContent = 'Unable to connect to the agentic core. Please check your connection and try again.';
+                } else {
+                    const result = await response.json();
+                    const generatedText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (generatedText) {
+                        responseText.textContent = generatedText;
+                    } else {
+                        responseText.textContent = 'Agent protocol error. Data could not be processed.';
+                    }
+                }
+
+                loadingIndicator.classList.add('hidden');
+                queryButton.disabled = false;
+                queryButton.style.opacity = 1;
+            });
+        });
+    </script>
+</body>
+</html>
