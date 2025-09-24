@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-  // --- Mobile Menu Toggle (all screens) ---
+  // --- Mobile Menu Toggle (works everywhere) ---
   const mobileMenuButton = document.getElementById('mobile-menu-button');
   const mobileMenu = document.getElementById('mobile-menu');
   const navLinks = document.querySelectorAll('#mobile-menu a, nav a');
@@ -30,20 +30,17 @@ document.addEventListener('DOMContentLoaded', () => {
   renderer.setPixelRatio(window.devicePixelRatio);
   container.appendChild(renderer.domElement);
 
-  camera.position.z = 15;
+  camera.position.z = 18;
 
-  // Postprocessing for glow
+  // Postprocessing bloom
   const composer = new THREE.EffectComposer(renderer);
-  const renderPass = new THREE.RenderPass(scene, camera);
-  composer.addPass(renderPass);
-  const bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
-  bloomPass.threshold = 0;
-  bloomPass.strength = 2.0;
-  bloomPass.radius = 0.5;
+  composer.addPass(new THREE.RenderPass(scene, camera));
+  const bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.8, 0.6, 0.9);
+  bloomPass.strength = 2.2;
   composer.addPass(bloomPass);
 
-  // Digital Core (Wireframe)
-  const coreGeometry = new THREE.IcosahedronGeometry(3, 3);
+  // Digital wireframe core
+  const coreGeometry = new THREE.IcosahedronGeometry(4, 2);
   const coreMaterial = new THREE.MeshBasicMaterial({
     color: 0x00ffff,
     wireframe: true,
@@ -53,22 +50,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const core = new THREE.Mesh(coreGeometry, coreMaterial);
   scene.add(core);
 
-  // Inner pulsing sphere
-  const innerCoreGeometry = new THREE.SphereGeometry(1.2, 64, 64);
+  // Inner glowing sphere
+  const innerCoreGeometry = new THREE.SphereGeometry(2, 64, 64);
   const innerCoreMaterial = new THREE.MeshStandardMaterial({
     emissive: 0x0040ff,
     emissiveIntensity: 1.5,
     color: 0x111111,
-    metalness: 0.8,
+    metalness: 0.9,
     roughness: 0.2
   });
   const innerCore = new THREE.Mesh(innerCoreGeometry, innerCoreMaterial);
   scene.add(innerCore);
 
-  // Orbiting Agent Nodes
+  // Orbiting agent nodes
   const agentNodes = [];
-  const nodeGeometry = new THREE.SphereGeometry(0.4, 64, 64);
-
+  const nodeGeometry = new THREE.SphereGeometry(0.6, 64, 64);
   for (let i = 0; i < 10; i++) {
     const nodeMaterial = new THREE.MeshStandardMaterial({
       emissive: new THREE.Color(`hsl(${Math.random()*360}, 100%, 50%)`),
@@ -78,84 +74,92 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     const node = new THREE.Mesh(nodeGeometry, nodeMaterial);
     node.position.set(
-      Math.cos(i * Math.PI/5) * 7,
-      Math.sin(i * Math.PI/5) * 7,
-      (Math.random()-0.5) * 4
+      Math.cos(i * Math.PI/5) * 10,
+      Math.sin(i * Math.PI/5) * 10,
+      (Math.random()-0.5) * 6
     );
     scene.add(node);
-    agentNodes.push({ mesh: node, angle: i * 0.6, material: nodeMaterial });
+    agentNodes.push({ mesh: node, angle: i*0.6, material: nodeMaterial });
   }
 
-  // Lines (digital signal beams)
-  const lines = [];
+  // Signal beams
+  const beams = [];
   agentNodes.forEach(nodeObj => {
     const points = [core.position.clone(), nodeObj.mesh.position.clone()];
     const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
-    const lineMaterial = new THREE.ShaderMaterial({
+    const lineMaterial = new THREE.LineBasicMaterial({
+      color: 0x00ffff,
       transparent: true,
-      uniforms: {
-        time: { value: 0 },
-        color1: { value: new THREE.Color(0x00ffff) },
-        color2: { value: new THREE.Color(0xff00ff) }
-      },
-      vertexShader: `
-        varying vec3 vPos;
-        void main() {
-          vPos = position;
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
-        }
-      `,
-      fragmentShader: `
-        uniform float time;
-        uniform vec3 color1;
-        uniform vec3 color2;
-        varying vec3 vPos;
-        void main() {
-          float t = abs(sin(time + vPos.x*0.1));
-          vec3 color = mix(color1, color2, t);
-          gl_FragColor = vec4(color, 0.8);
-        }
-      `
+      opacity: 0.4
     });
     const line = new THREE.Line(lineGeometry, lineMaterial);
     scene.add(line);
-    lines.push({ line, node: nodeObj });
+    beams.push({ line, node: nodeObj });
+  });
+
+  // Particle trails (photons)
+  const trailParticles = [];
+  const particleGeometry = new THREE.SphereGeometry(0.1, 8, 8);
+  const particleMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+
+  beams.forEach(b => {
+    for (let i = 0; i < 6; i++) {
+      const particle = new THREE.Mesh(particleGeometry, particleMaterial.clone());
+      scene.add(particle);
+      trailParticles.push({
+        mesh: particle,
+        progress: Math.random(), // 0 to 1 along beam
+        speed: 0.002 + Math.random()*0.004,
+        start: core.position.clone(),
+        end: b.node.mesh.position,
+        node: b.node
+      });
+    }
   });
 
   // Lights
-  const pointLight = new THREE.PointLight(0x00ffff, 3, 100);
-  pointLight.position.set(10,10,10);
-  scene.add(pointLight);
+  scene.add(new THREE.PointLight(0x00ffff, 3, 100).position.set(10,10,10));
   scene.add(new THREE.AmbientLight(0xffffff, 0.3));
 
   // Animate
-  let clock = new THREE.Clock();
+  const clock = new THREE.Clock();
   function animate(){
     requestAnimationFrame(animate);
-
     const t = clock.getElapsedTime();
 
-    // Core rotations
-    core.rotation.x += 0.001;
+    // Core pulse
     core.rotation.y += 0.002;
-    innerCore.material.emissiveIntensity = 1.5 + Math.sin(t*2)*0.5;
+    innerCore.material.emissiveIntensity = 1.5 + Math.sin(t*2)*0.7;
 
-    // Orbit nodes
+    // Nodes orbit + pulse
     agentNodes.forEach((nodeObj, i) => {
-      nodeObj.angle += 0.002 + i*0.0003;
-      nodeObj.mesh.position.x = Math.cos(nodeObj.angle) * 7;
-      nodeObj.mesh.position.z = Math.sin(nodeObj.angle) * 7;
-      nodeObj.material.emissive.setHSL((Math.sin(t + i) * 0.5 + 0.5), 1, 0.5); // gradient pulse
+      nodeObj.angle += 0.001 + i*0.0002;
+      nodeObj.mesh.position.x = Math.cos(nodeObj.angle) * 10;
+      nodeObj.mesh.position.z = Math.sin(nodeObj.angle) * 10;
+      nodeObj.material.emissive.setHSL((Math.sin(t + i) * 0.5 + 0.5), 1, 0.5);
     });
 
-    // Update lines (dynamic movement)
-    lines.forEach(l => {
-      l.line.material.uniforms.time.value = t*3;
+    // Update beams
+    beams.forEach(b => {
       const positions = new Float32Array([
         core.position.x, core.position.y, core.position.z,
-        l.node.mesh.position.x, l.node.mesh.position.y, l.node.mesh.position.z
+        b.node.mesh.position.x, b.node.mesh.position.y, b.node.mesh.position.z
       ]);
-      l.line.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      b.line.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      b.line.geometry.attributes.position.needsUpdate = true;
+    });
+
+    // Animate trail particles (photons)
+    trailParticles.forEach(p => {
+      p.progress += p.speed;
+      if (p.progress >= 1) {
+        p.progress = 0;
+        // Flash node on "arrival"
+        p.node.material.emissiveIntensity = 3;
+        setTimeout(()=>{p.node.material.emissiveIntensity = 2;},150);
+      }
+      p.mesh.position.lerpVectors(p.start, p.end, p.progress);
+      p.mesh.material.color.setHSL((t*2 + p.progress) % 1, 1, 0.5);
     });
 
     composer.render();
