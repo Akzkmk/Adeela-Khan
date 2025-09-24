@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // --- Background Particles Animation ---
+  // --- Background Particles Animation (cleaner, subtle) ---
   const bgCanvas = document.getElementById('bg-canvas');
   const bgCtx = bgCanvas.getContext('2d');
   let particles = [];
@@ -47,13 +47,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  for(let i=0;i<120;i++){
+  particles = [];
+  for(let i=0;i<60;i++){ // fewer, more elegant
     particles.push(new Particle(
       Math.random()*bgCanvas.width,
       Math.random()*bgCanvas.height,
       Math.random()*1.5,
-      `rgba(127,255,255,${Math.random()})`,
-      {x:(Math.random()-0.5)*0.2, y:(Math.random()-0.5)*0.2}
+      `rgba(0,255,255,${Math.random()*0.5})`,
+      {x:(Math.random()-0.5)*0.3, y:(Math.random()-0.5)*0.3}
     ));
   }
 
@@ -82,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderer.setPixelRatio(window.devicePixelRatio);
   container.appendChild(renderer.domElement);
 
-  camera.position.z = 5;
+  camera.position.z = 6;
 
   // Futuristic digital agentic core
   const geometry = new THREE.IcosahedronGeometry(2, 2);
@@ -91,30 +92,51 @@ document.addEventListener('DOMContentLoaded', () => {
     metalness: 0.7,
     roughness: 0.2,
     emissive: 0x0040ff,
-    emissiveIntensity:0.5,
-    wireframe: false
+    emissiveIntensity:0.6,
+    wireframe: true
   });
   const core = new THREE.Mesh(geometry, material);
   scene.add(core);
 
-  const pointLight1 = new THREE.PointLight(0x00ffff, 2, 100);
+  // Orbiting Agent Nodes
+  const agentNodes = [];
+  const nodeGeometry = new THREE.SphereGeometry(0.15, 16, 16);
+  const nodeMaterial = new THREE.MeshStandardMaterial({
+    color: 0xff00ff,
+    emissive: 0xaa00ff,
+    emissiveIntensity: 1
+  });
+
+  for (let i = 0; i < 6; i++) {
+    const node = new THREE.Mesh(nodeGeometry, nodeMaterial.clone());
+    node.position.set(
+      Math.cos(i * Math.PI / 3) * 3,
+      Math.sin(i * Math.PI / 3) * 3,
+      0
+    );
+    scene.add(node);
+    agentNodes.push({ mesh: node, angle: i * Math.PI / 3 });
+  }
+
+  // Lights
+  const pointLight1 = new THREE.PointLight(0x00ffff, 1.5, 100);
   pointLight1.position.set(5,5,5);
   scene.add(pointLight1);
 
-  const pointLight2 = new THREE.PointLight(0xff00ff, 2, 100);
+  const pointLight2 = new THREE.PointLight(0xff00ff, 1.5, 100);
   pointLight2.position.set(-5,-5,5);
   scene.add(pointLight2);
 
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
   scene.add(ambientLight);
 
+  // Drag Interaction
   let isDragging = false;
   let previousMousePosition = {x:0,y:0};
 
   container.addEventListener('mousedown',()=>{isDragging=true;});
   container.addEventListener('mouseup',()=>{isDragging=false;});
   container.addEventListener('mouseleave',()=>{isDragging=false;});
-
   container.addEventListener('mousemove',(e)=>{
     if(!isDragging) return;
     const deltaMove = {x: e.offsetX-previousMousePosition.x, y:e.offsetY-previousMousePosition.y};
@@ -123,12 +145,22 @@ document.addEventListener('DOMContentLoaded', () => {
     previousMousePosition = {x:e.offsetX, y:e.offsetY};
   });
 
+  // Animation Loop
   function animateCore(){
     requestAnimationFrame(animateCore);
+
     if(!isDragging){
       core.rotation.x += 0.001;
       core.rotation.y += 0.002;
     }
+
+    // orbit nodes
+    agentNodes.forEach((node) => {
+      node.angle += 0.003;
+      node.mesh.position.x = Math.cos(node.angle) * 3;
+      node.mesh.position.z = Math.sin(node.angle) * 3;
+    });
+
     renderer.render(scene,camera);
   }
   animateCore();
