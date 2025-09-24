@@ -1,4 +1,4 @@
-// script.js - 2049 Futuristic Digital Agentic Core
+// script.js - Futuristic 2049 Agentic Core + streaks + menu
 document.addEventListener('DOMContentLoaded', () => {
 
   // --- Mobile Menu ---
@@ -22,113 +22,86 @@ document.addEventListener('DOMContentLoaded', () => {
 
   class Streak {
     constructor(ctx){ this.ctx=ctx; this.reset(); }
-    reset(){ this.x=Math.random()*bgCanvas.width; this.y=Math.random()*bgCanvas.height; this.len=50+Math.random()*120; this.speed=0.3+Math.random()*0.5; this.hue=180+Math.random()*120; }
+    reset(){ this.x=Math.random()*bgCanvas.width; this.y=Math.random()*bgCanvas.height; this.len=50+Math.random()*120; this.speed=0.5+Math.random(); this.hue=180+Math.random()*120; }
     draw(){ const g=this.ctx.createLinearGradient(this.x,this.y,this.x-this.len,this.y); g.addColorStop(0,`hsla(${this.hue},100%,70%,1)`); g.addColorStop(1,`hsla(${this.hue},100%,70%,0)`); this.ctx.strokeStyle=g; this.ctx.beginPath(); this.ctx.moveTo(this.x,this.y); this.ctx.lineTo(this.x-this.len,this.y); this.ctx.stroke(); }
     update(){ this.x+=this.speed; if(this.x-this.len>bgCanvas.width) this.reset(); this.draw(); }
   }
-  const streaks=Array.from({length:60},()=>new Streak(bgCtx));
+  const streaks=Array.from({length:80},()=>new Streak(bgCtx));
   (function animateStreaks(){ bgCtx.clearRect(0,0,bgCanvas.width,bgCanvas.height); streaks.forEach(s=>s.update()); requestAnimationFrame(animateStreaks); })();
 
-  // --- Three.js Futuristic Agentic Core ---
+  // --- Three.js Futuristic Core ---
   const container = document.getElementById('agentic-core-container');
   if(container && THREE){
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(65, window.innerWidth/window.innerHeight, 0.1, 2000);
-    camera.position.z = 35;
+    const scene=new THREE.Scene();
+    const camera=new THREE.PerspectiveCamera(65, window.innerWidth/window.innerHeight, 0.1, 2000);
+    camera.position.z=35;
 
-    const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    const renderer=new THREE.WebGLRenderer({antialias:true, alpha:true});
+    renderer.setSize(window.innerWidth,window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
     container.appendChild(renderer.domElement);
 
-    // --- Core group ---
+    // --- Core: layered digital geometry ---
     const coreGroup = new THREE.Group();
     scene.add(coreGroup);
 
-    // Core layers: semi-transparent, wireframe, emissive
-    const layers = [];
-    const createLayer = (size, hue, opacity, wire=false)=>{
+    const createCoreLayer=(size,hue,opacity,wire=false)=>{
       const geo = new THREE.IcosahedronGeometry(size,1);
       let mat;
       if(wire){
-        mat = new THREE.MeshBasicMaterial({color:new THREE.Color(`hsl(${hue},100%,70%)`),wireframe:true,opacity,transparent:true});
+        mat=new THREE.MeshBasicMaterial({color:new THREE.Color(`hsl(${hue},100%,70%)`),wireframe:true,opacity,transparent:true});
       } else {
-        mat = new THREE.MeshStandardMaterial({color:new THREE.Color(`hsl(${hue},80%,60%)`),emissive:new THREE.Color(`hsl(${hue},80%,40%)`),emissiveIntensity:0.6,metalness:0.4,roughness:0.1,transparent:true,opacity});
+        mat=new THREE.MeshStandardMaterial({color:new THREE.Color(`hsl(${hue},80%,60%)`),emissive:new THREE.Color(`hsl(${hue},80%,40%)`),emissiveIntensity:0.7,metalness:0.5,roughness:0.1,transparent:true,opacity});
       }
-      const mesh = new THREE.Mesh(geo, mat);
+      const mesh=new THREE.Mesh(geo,mat);
       coreGroup.add(mesh);
-      layers.push({mesh,mat,baseOpacity:opacity});
       return mesh;
     }
 
-    createLayer(6,180,0.2,false);
-    createLayer(4,200,0.3,true);
-    createLayer(2.5,220,0.5,false);
+    const layers=[
+      createCoreLayer(6,180,0.2,false),
+      createCoreLayer(4,200,0.4,true),
+      createCoreLayer(2,220,0.7,false)
+    ];
 
-    // Orbiting nodes
-    const nodes = [], photons = [];
-    const nodeCount = 10, orbitRadius = 15;
-    const nodeGeo = new THREE.SphereGeometry(0.35,16,16);
+    // Nodes orbiting
+    const nodes=[], photons=[];
+    const nodeCount=10, orbitRadius=15;
+    const nodeGeo=new THREE.SphereGeometry(0.4,16,16);
     for(let i=0;i<nodeCount;i++){
-      const mat = new THREE.MeshStandardMaterial({emissive:0x00ffff,emissiveIntensity:0.5,metalness:0.3,roughness:0.1});
-      const mesh = new THREE.Mesh(nodeGeo, mat);
+      const mat=new THREE.MeshStandardMaterial({emissive:0x00ffff,emissiveIntensity:0.8,metalness:0.5,roughness:0.1});
+      const mesh=new THREE.Mesh(nodeGeo,mat);
       scene.add(mesh);
-      nodes.push({mesh,angle:Math.random()*Math.PI*2,baseIntensity:0.5});
+      nodes.push({mesh,angle:Math.random()*Math.PI*2});
       // photon
-      const p = new THREE.Mesh(new THREE.SphereGeometry(0.15,12,12), new THREE.MeshBasicMaterial({color:0x00ffff}));
+      const p=new THREE.Mesh(new THREE.SphereGeometry(0.15,12,12),new THREE.MeshBasicMaterial({color:0x00ffff}));
       scene.add(p);
       photons.push({photon:p,progress:Math.random()});
     }
 
     // Lighting
-    scene.add(new THREE.AmbientLight(0x404040,1.2));
-    const pointLight = new THREE.PointLight(0x00ffff,1.8,100);
+    scene.add(new THREE.AmbientLight(0x404040,1.5));
+    const pointLight=new THREE.PointLight(0x00ffff,2,100);
     pointLight.position.set(20,20,20);
     scene.add(pointLight);
 
-    // --- Holographic scan lines overlay ---
-    const scanMaterial = new THREE.LineBasicMaterial({color:0x00ffff,transparent:true,opacity:0.05});
-    const scanLines = [];
-    for(let i=0;i<30;i++){
-      const geometry = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-10,i-15,0), new THREE.Vector3(10,i-15,0)]);
-      const line = new THREE.Line(geometry, scanMaterial);
-      coreGroup.add(line);
-      scanLines.push({line,yOffset:i*0.5});
-    }
-
     // Animate
-    let pulse = 0;
     function animate(){
       requestAnimationFrame(animate);
+      coreGroup.rotation.y+=0.001;
+      coreGroup.rotation.x+=0.0005;
 
-      // Core rotation
-      coreGroup.rotation.y += 0.0008;
-      coreGroup.rotation.x += 0.0004;
-
-      // Pulse layers
-      pulse += 0.005;
-      layers.forEach(l=>{
-        l.mat.emissiveIntensity = 0.5 + 0.2*Math.sin(pulse*2);
-      });
-
-      // Orbit nodes & photon pulses
+      // Orbit nodes slowly
       nodes.forEach((n,i)=>{
-        n.angle += 0.0008;
-        n.mesh.position.set(Math.cos(n.angle)*orbitRadius, Math.sin(n.angle*0.5)*3, Math.sin(n.angle)*orbitRadius);
-
-        // node pulse if photon is near
-        const p = photons[i];
-        p.progress += 0.003;
-        if(p.progress>1){ p.progress=0; }
-        const dist = p.photon.position.distanceTo(n.mesh.position);
-        n.mesh.material.emissiveIntensity = n.baseIntensity + (dist<1?0.5:0);
-        p.photon.position.lerpVectors(coreGroup.position, n.mesh.position, p.progress);
+        n.angle+=0.001;
+        n.mesh.position.set(Math.cos(n.angle)*orbitRadius,Math.sin(n.angle*0.5)*3,Math.sin(n.angle)*orbitRadius);
       });
 
-      // Scan lines animation
-      scanLines.forEach(s=>{
-        s.line.position.y += 0.01;
-        if(s.line.position.y>15) s.line.position.y=-15;
+      // Photons along node beams
+      photons.forEach((p,i)=>{
+        p.progress+=0.003;
+        if(p.progress>1) p.progress=0;
+        p.photon.position.lerpVectors(coreGroup.position,nodes[i].mesh.position,p.progress);
       });
 
       renderer.render(scene,camera);
@@ -136,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
     animate();
 
     window.addEventListener('resize',()=>{
-      camera.aspect = window.innerWidth/window.innerHeight;
+      camera.aspect=window.innerWidth/window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth,window.innerHeight);
     });
