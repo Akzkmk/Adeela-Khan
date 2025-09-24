@@ -3,11 +3,20 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- Mobile Menu Toggle ---
   const mobileMenuButton = document.getElementById('mobile-menu-button');
   const mobileMenu = document.getElementById('mobile-menu');
+  const navLinks = document.querySelectorAll('#mobile-menu a, nav a');
+
   mobileMenuButton.addEventListener('click', () => {
     mobileMenu.classList.toggle('hidden');
   });
 
-  // --- Smooth Scrolling ---
+  // Close menu after clicking a link
+  navLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      mobileMenu.classList.add('hidden');
+    });
+  });
+
+  // --- Smooth Scrolling (works everywhere) ---
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function(e) {
       e.preventDefault();
@@ -16,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // --- Background Particles Animation (cleaner, subtle) ---
+  // --- Background Particles Animation ---
   const bgCanvas = document.getElementById('bg-canvas');
   const bgCtx = bgCanvas.getContext('2d');
   let particles = [];
@@ -48,13 +57,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   particles = [];
-  for(let i=0;i<60;i++){ // fewer, more elegant
+  for(let i=0;i<50;i++){
     particles.push(new Particle(
       Math.random()*bgCanvas.width,
       Math.random()*bgCanvas.height,
       Math.random()*1.5,
-      `rgba(0,255,255,${Math.random()*0.5})`,
-      {x:(Math.random()-0.5)*0.3, y:(Math.random()-0.5)*0.3}
+      `rgba(0,255,255,${Math.random()*0.4})`,
+      {x:(Math.random()-0.5)*0.25, y:(Math.random()-0.5)*0.25}
     ));
   }
 
@@ -83,52 +92,61 @@ document.addEventListener('DOMContentLoaded', () => {
   renderer.setPixelRatio(window.devicePixelRatio);
   container.appendChild(renderer.domElement);
 
-  camera.position.z = 6;
+  camera.position.z = 9;
 
-  // Futuristic digital agentic core
-  const geometry = new THREE.IcosahedronGeometry(2, 2);
+  // Core (bigger, high res)
+  const geometry = new THREE.IcosahedronGeometry(3, 4);
   const material = new THREE.MeshStandardMaterial({
     color: 0x00ffff,
-    metalness: 0.7,
-    roughness: 0.2,
-    emissive: 0x0040ff,
-    emissiveIntensity:0.6,
-    wireframe: true
+    metalness: 0.8,
+    roughness: 0.15,
+    emissive: 0x0077ff,
+    emissiveIntensity: 0.8,
+    wireframe: false
   });
   const core = new THREE.Mesh(geometry, material);
   scene.add(core);
 
   // Orbiting Agent Nodes
   const agentNodes = [];
-  const nodeGeometry = new THREE.SphereGeometry(0.15, 16, 16);
-  const nodeMaterial = new THREE.MeshStandardMaterial({
-    color: 0xff00ff,
-    emissive: 0xaa00ff,
-    emissiveIntensity: 1
-  });
+  const nodeGeometry = new THREE.SphereGeometry(0.3, 32, 32);
 
-  for (let i = 0; i < 6; i++) {
-    const node = new THREE.Mesh(nodeGeometry, nodeMaterial.clone());
+  for (let i = 0; i < 8; i++) {
+    const nodeMaterial = new THREE.MeshStandardMaterial({
+      color: 0xff00ff,
+      emissive: 0xaa00ff,
+      emissiveIntensity: 1
+    });
+    const node = new THREE.Mesh(nodeGeometry, nodeMaterial);
     node.position.set(
-      Math.cos(i * Math.PI / 3) * 3,
-      Math.sin(i * Math.PI / 3) * 3,
+      Math.cos(i * Math.PI / 4) * 5,
+      Math.sin(i * Math.PI / 4) * 5,
       0
     );
     scene.add(node);
-    agentNodes.push({ mesh: node, angle: i * Math.PI / 3 });
+    agentNodes.push({ mesh: node, angle: i * Math.PI / 4, material: nodeMaterial });
   }
 
+  // Lines from core to nodes
+  const lines = [];
+  const lineMaterial = new THREE.LineBasicMaterial({
+    color: 0x00ffff,
+    transparent: true,
+    opacity: 0.6
+  });
+
+  agentNodes.forEach(nodeObj => {
+    const points = [core.position.clone(), nodeObj.mesh.position.clone()];
+    const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
+    const line = new THREE.Line(lineGeometry, lineMaterial.clone());
+    scene.add(line);
+    lines.push({ line, node: nodeObj });
+  });
+
   // Lights
-  const pointLight1 = new THREE.PointLight(0x00ffff, 1.5, 100);
-  pointLight1.position.set(5,5,5);
-  scene.add(pointLight1);
-
-  const pointLight2 = new THREE.PointLight(0xff00ff, 1.5, 100);
-  pointLight2.position.set(-5,-5,5);
-  scene.add(pointLight2);
-
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
-  scene.add(ambientLight);
+  scene.add(new THREE.PointLight(0x00ffff, 2, 100).position.set(5,5,5));
+  scene.add(new THREE.PointLight(0xff00ff, 2, 100).position.set(-5,-5,5));
+  scene.add(new THREE.AmbientLight(0xffffff, 0.3));
 
   // Drag Interaction
   let isDragging = false;
@@ -146,20 +164,42 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Animation Loop
+  let signalTimer = 0;
   function animateCore(){
     requestAnimationFrame(animateCore);
 
     if(!isDragging){
-      core.rotation.x += 0.001;
+      core.rotation.x += 0.0015;
       core.rotation.y += 0.002;
     }
 
-    // orbit nodes
-    agentNodes.forEach((node) => {
-      node.angle += 0.003;
-      node.mesh.position.x = Math.cos(node.angle) * 3;
-      node.mesh.position.z = Math.sin(node.angle) * 3;
+    // Orbit nodes
+    agentNodes.forEach((nodeObj, i) => {
+      nodeObj.angle += 0.002 + i*0.0002;
+      nodeObj.mesh.position.x = Math.cos(nodeObj.angle) * 5;
+      nodeObj.mesh.position.z = Math.sin(nodeObj.angle) * 5;
     });
+
+    // Update lines
+    lines.forEach(l => {
+      const positions = new Float32Array([
+        core.position.x, core.position.y, core.position.z,
+        l.node.mesh.position.x, l.node.mesh.position.y, l.node.mesh.position.z
+      ]);
+      l.line.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    });
+
+    // Simulate "signals" pulsing between core <-> nodes
+    signalTimer++;
+    if(signalTimer % 200 === 0){
+      const randomNode = agentNodes[Math.floor(Math.random()*agentNodes.length)];
+      randomNode.material.color.setHex(0x00ffff); // temporarily change color
+      randomNode.material.emissive.setHex(0x00ffff);
+      setTimeout(()=>{
+        randomNode.material.color.setHex(0xff00ff);
+        randomNode.material.emissive.setHex(0xaa00ff);
+      }, 600);
+    }
 
     renderer.render(scene,camera);
   }
