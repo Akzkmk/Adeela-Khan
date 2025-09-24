@@ -1,164 +1,134 @@
-// Wait until DOM is loaded
+// script.js - 2049 Futuristic Digital Agentic Core
 document.addEventListener('DOMContentLoaded', () => {
 
   // --- Mobile Menu ---
   const mobileMenuButton = document.getElementById('mobile-menu-button');
   const mobileMenu = document.getElementById('mobile-menu');
   const navLinks = document.querySelectorAll('#mobile-menu a, .header nav a');
-
   mobileMenuButton.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
-  navLinks.forEach(link => link.addEventListener('click', () => mobileMenu.classList.add('hidden')));
-
-  // Smooth scroll for internal links
+  navLinks.forEach(l => l.addEventListener('click', () => mobileMenu.classList.add('hidden')));
   document.querySelectorAll('a[href^="#"]').forEach(a => {
-    a.addEventListener('click', function(e) {
+    a.addEventListener('click', function(e){
       e.preventDefault();
-      const target = document.querySelector(this.getAttribute('href'));
-      if(target){
-        target.scrollIntoView({ behavior: 'smooth' });
-      }
+      document.querySelector(this.getAttribute('href'))?.scrollIntoView({behavior:'smooth'});
     });
   });
 
   // --- Background Streaks ---
   const bgCanvas = document.getElementById('bg-canvas');
-  const linesCanvas = document.getElementById('lines-canvas');
   const bgCtx = bgCanvas.getContext('2d');
-  const linesCtx = linesCanvas.getContext('2d');
-
-  function resizeCanvas() {
-    bgCanvas.width = window.innerWidth;
-    bgCanvas.height = window.innerHeight;
-    linesCanvas.width = window.innerWidth;
-    linesCanvas.height = window.innerHeight;
-  }
-  resizeCanvas();
-  window.addEventListener('resize', resizeCanvas);
+  function resizeCanvas(){ bgCanvas.width=window.innerWidth; bgCanvas.height=window.innerHeight; }
+  resizeCanvas(); window.addEventListener('resize', resizeCanvas);
 
   class Streak {
-    constructor(ctx, width, height) {
-      this.ctx = ctx;
-      this.width = width;
-      this.height = height;
-      this.reset();
-    }
-    reset() {
-      this.x = Math.random() * this.width;
-      this.y = Math.random() * this.height;
-      this.len = 50 + Math.random() * 150;
-      this.speed = 2 + Math.random() * 3;
-      this.hue = 180 + Math.random() * 120;
-    }
-    draw() {
-      const grad = this.ctx.createLinearGradient(this.x, this.y, this.x - this.len, this.y);
-      grad.addColorStop(0, `hsla(${this.hue},100%,60%,1)`);
-      grad.addColorStop(1, `hsla(${this.hue},100%,60%,0)`);
-      this.ctx.strokeStyle = grad;
-      this.ctx.beginPath();
-      this.ctx.moveTo(this.x, this.y);
-      this.ctx.lineTo(this.x - this.len, this.y);
-      this.ctx.stroke();
-    }
-    update() {
-      this.x += this.speed;
-      if(this.x - this.len > this.width) this.reset();
-      this.draw();
-    }
+    constructor(ctx){ this.ctx=ctx; this.reset(); }
+    reset(){ this.x=Math.random()*bgCanvas.width; this.y=Math.random()*bgCanvas.height; this.len=50+Math.random()*120; this.speed=0.3+Math.random()*0.5; this.hue=180+Math.random()*120; }
+    draw(){ const g=this.ctx.createLinearGradient(this.x,this.y,this.x-this.len,this.y); g.addColorStop(0,`hsla(${this.hue},100%,70%,1)`); g.addColorStop(1,`hsla(${this.hue},100%,70%,0)`); this.ctx.strokeStyle=g; this.ctx.beginPath(); this.ctx.moveTo(this.x,this.y); this.ctx.lineTo(this.x-this.len,this.y); this.ctx.stroke(); }
+    update(){ this.x+=this.speed; if(this.x-this.len>bgCanvas.width) this.reset(); this.draw(); }
   }
+  const streaks=Array.from({length:60},()=>new Streak(bgCtx));
+  (function animateStreaks(){ bgCtx.clearRect(0,0,bgCanvas.width,bgCanvas.height); streaks.forEach(s=>s.update()); requestAnimationFrame(animateStreaks); })();
 
-  const streaks = Array.from({ length: 100 }, () => new Streak(bgCtx, window.innerWidth, window.innerHeight));
-  (function animateStreaks() {
-    bgCtx.clearRect(0,0,bgCanvas.width,bgCanvas.height);
-    streaks.forEach(s => s.update());
-    requestAnimationFrame(animateStreaks);
-  })();
-
-  // --- Three.js Agentic Core ---
+  // --- Three.js Futuristic Agentic Core ---
   const container = document.getElementById('agentic-core-container');
   if(container && THREE){
-
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.1, 2000);
-    camera.position.z = 30;
+    const camera = new THREE.PerspectiveCamera(65, window.innerWidth/window.innerHeight, 0.1, 2000);
+    camera.position.z = 35;
 
-    const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
+    const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
     container.appendChild(renderer.domElement);
 
-    // Core
-    const coreGeo = new THREE.IcosahedronGeometry(6, 3);
-    const coreMat = new THREE.MeshStandardMaterial({
-      color: 0x00ffff,
-      emissive: 0x0099ff,
-      emissiveIntensity: 1.5,
-      metalness: 0.9,
-      roughness: 0.2
-    });
-    const core = new THREE.Mesh(coreGeo, coreMat);
-    scene.add(core);
+    // --- Core group ---
+    const coreGroup = new THREE.Group();
+    scene.add(coreGroup);
 
-    // Nodes
-    const nodes = [], beams = [], photons = [];
-    const nodeCount = 8, orbitRadius = 15;
-    const nodeGeo = new THREE.SphereGeometry(1,32,32);
+    // Core layers: semi-transparent, wireframe, emissive
+    const layers = [];
+    const createLayer = (size, hue, opacity, wire=false)=>{
+      const geo = new THREE.IcosahedronGeometry(size,1);
+      let mat;
+      if(wire){
+        mat = new THREE.MeshBasicMaterial({color:new THREE.Color(`hsl(${hue},100%,70%)`),wireframe:true,opacity,transparent:true});
+      } else {
+        mat = new THREE.MeshStandardMaterial({color:new THREE.Color(`hsl(${hue},80%,60%)`),emissive:new THREE.Color(`hsl(${hue},80%,40%)`),emissiveIntensity:0.6,metalness:0.4,roughness:0.1,transparent:true,opacity});
+      }
+      const mesh = new THREE.Mesh(geo, mat);
+      coreGroup.add(mesh);
+      layers.push({mesh,mat,baseOpacity:opacity});
+      return mesh;
+    }
 
+    createLayer(6,180,0.2,false);
+    createLayer(4,200,0.3,true);
+    createLayer(2.5,220,0.5,false);
+
+    // Orbiting nodes
+    const nodes = [], photons = [];
+    const nodeCount = 10, orbitRadius = 15;
+    const nodeGeo = new THREE.SphereGeometry(0.35,16,16);
     for(let i=0;i<nodeCount;i++){
-      const mat = new THREE.MeshStandardMaterial({
-        emissive:0x00ccff,
-        emissiveIntensity:1.5,
-        metalness:0.8
-      });
+      const mat = new THREE.MeshStandardMaterial({emissive:0x00ffff,emissiveIntensity:0.5,metalness:0.3,roughness:0.1});
       const mesh = new THREE.Mesh(nodeGeo, mat);
-      mesh.position.set(Math.cos(i*2*Math.PI/nodeCount)*orbitRadius,0,Math.sin(i*2*Math.PI/nodeCount)*orbitRadius);
       scene.add(mesh);
-      nodes.push({mesh,mat,flash:0});
-
-      // Beam
-      const points = [core.position.clone(), mesh.position.clone()];
-      const beamGeo = new THREE.BufferGeometry().setFromPoints(points);
-      const beamMat = new THREE.LineBasicMaterial({color:0x00ffff,transparent:true,opacity:0.4});
-      const beam = new THREE.Line(beamGeo, beamMat);
-      scene.add(beam);
-      beams.push({line:beam,mesh});
-
-      // Photon
-      const photon = new THREE.Mesh(new THREE.SphereGeometry(0.2,16,16),
-        new THREE.MeshBasicMaterial({color:0x00ffff}));
-      scene.add(photon);
-      photons.push({photon,progress:Math.random()});
+      nodes.push({mesh,angle:Math.random()*Math.PI*2,baseIntensity:0.5});
+      // photon
+      const p = new THREE.Mesh(new THREE.SphereGeometry(0.15,12,12), new THREE.MeshBasicMaterial({color:0x00ffff}));
+      scene.add(p);
+      photons.push({photon:p,progress:Math.random()});
     }
 
     // Lighting
-    scene.add(new THREE.AmbientLight(0x404040,2));
-    const point = new THREE.PointLight(0x00ffff,3,100);
-    point.position.set(20,20,20);
-    scene.add(point);
+    scene.add(new THREE.AmbientLight(0x404040,1.2));
+    const pointLight = new THREE.PointLight(0x00ffff,1.8,100);
+    pointLight.position.set(20,20,20);
+    scene.add(pointLight);
+
+    // --- Holographic scan lines overlay ---
+    const scanMaterial = new THREE.LineBasicMaterial({color:0x00ffff,transparent:true,opacity:0.05});
+    const scanLines = [];
+    for(let i=0;i<30;i++){
+      const geometry = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-10,i-15,0), new THREE.Vector3(10,i-15,0)]);
+      const line = new THREE.Line(geometry, scanMaterial);
+      coreGroup.add(line);
+      scanLines.push({line,yOffset:i*0.5});
+    }
 
     // Animate
+    let pulse = 0;
     function animate(){
       requestAnimationFrame(animate);
-      core.rotation.y += 0.003;
-      core.rotation.x += 0.001;
 
-      nodes.forEach((n,i)=>{
-        const angle = Date.now()*0.0005 + i;
-        n.mesh.position.set(Math.cos(angle)*orbitRadius, Math.sin(angle*0.5)*3, Math.sin(angle)*orbitRadius);
-        if(n.flash>0){ n.flash-=0.02; n.mat.emissive.setHSL(0.55,1,0.5+n.flash*0.5); } 
-        else { n.mat.emissive.set(0x00ccff); }
+      // Core rotation
+      coreGroup.rotation.y += 0.0008;
+      coreGroup.rotation.x += 0.0004;
+
+      // Pulse layers
+      pulse += 0.005;
+      layers.forEach(l=>{
+        l.mat.emissiveIntensity = 0.5 + 0.2*Math.sin(pulse*2);
       });
 
-      beams.forEach((b,i)=>{
-        const positions = b.line.geometry.attributes.position.array;
-        positions[3]=nodes[i].mesh.position.x;
-        positions[4]=nodes[i].mesh.position.y;
-        positions[5]=nodes[i].mesh.position.z;
-        b.line.geometry.attributes.position.needsUpdate = true;
+      // Orbit nodes & photon pulses
+      nodes.forEach((n,i)=>{
+        n.angle += 0.0008;
+        n.mesh.position.set(Math.cos(n.angle)*orbitRadius, Math.sin(n.angle*0.5)*3, Math.sin(n.angle)*orbitRadius);
 
-        const p=photons[i];
-        p.progress+=0.01;
-        if(p.progress>=1){ p.progress=0; nodes[i].flash=1; }
-        p.photon.position.lerpVectors(core.position, nodes[i].mesh.position, p.progress);
+        // node pulse if photon is near
+        const p = photons[i];
+        p.progress += 0.003;
+        if(p.progress>1){ p.progress=0; }
+        const dist = p.photon.position.distanceTo(n.mesh.position);
+        n.mesh.material.emissiveIntensity = n.baseIntensity + (dist<1?0.5:0);
+        p.photon.position.lerpVectors(coreGroup.position, n.mesh.position, p.progress);
+      });
+
+      // Scan lines animation
+      scanLines.forEach(s=>{
+        s.line.position.y += 0.01;
+        if(s.line.position.y>15) s.line.position.y=-15;
       });
 
       renderer.render(scene,camera);
@@ -170,6 +140,5 @@ document.addEventListener('DOMContentLoaded', () => {
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth,window.innerHeight);
     });
-
   }
 });
