@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Adeela Khan - AI Strategist & Digital Transformation Leader</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Teko:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Montserrat',sans-serif;background:#0a0a1a;color:#e0e0e0;overflow-x:hidden;}
+.font-teko{font-family:'Teko',sans-serif;}
+.section{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;position:relative;z-index:1;padding:80px 20px;}
+@media(min-width:768px){.section{padding:120px 40px;}}
+.glass-card{background:rgba(255,255,255,0.05);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:20px;border:1px solid rgba(255,255,255,0.1);transition:all 0.3s ease;margin-bottom:1.5rem;}
+.glass-card:hover{transform:translateY(-10px) scale(1.02);box-shadow:0 20px 40px rgba(0,0,0,0.3);border-color:rgba(0,255,255,0.3);}
+.timeline-item{position:relative;padding-left:50px;padding-bottom:50px;border-left:2px solid rgba(255,255,255,0.2);opacity:0;transform:translateX(-20px);transition:opacity 0.6s ease-out, transform 0.6s ease-out;}
+.timeline-item:last-child{border-left:2px solid transparent;padding-bottom:0;}
+.timeline-item.visible{opacity:1;transform:translateX(0);}
+.timeline-item::before{content:'';position:absolute;left:-11px;top:5px;width:20px;height:20px;border-radius:50%;background-color:#8A2BE2;border:3px solid #0a0a1a;transition:all 0.3s ease;box-shadow:0 0 15px #8A2BE2;}
+.timeline-item.visible::before{background-color:#FF00FF;box-shadow:0 0 25px #FF00FF;}
+.header{position:fixed;top:0;left:0;width:100%;padding:20px 40px;display:flex;justify-content:space-between;align-items:center;z-index:100;background: rgba(10,10,26,0.5);backdrop-filter:blur(10px);}
+.nav-link{color:#e0e0e0;text-decoration:none;margin:0 15px;font-weight:600;transition:color 0.3s,text-shadow 0.3s;letter-spacing:1px;text-transform:uppercase;}
+.nav-link:hover{color:#00ffff;text-shadow:0 0 10px #00ffff;}
+.logo{font-size:1.8rem;font-weight:bold;font-family:'Teko',sans-serif;letter-spacing:2px;color:#fff;}
+.professional-font-bold{font-family:'Teko',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:1px;}
+#bg-canvas,#lines-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;}
+#lines-canvas{pointer-events:none;z-index:0;}
+#agentic-core-container{width:100%;height:400px;cursor:grab;margin-bottom:2rem;}
+@media(min-width:768px){#agentic-core-container{height:500px;}}
+@media(max-width:768px){.nav-link{margin:10px 0;}}
+</style>
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+<canvas id="lines-canvas"></canvas>
+
+<header class="header">
+  <div class="logo">Welcome!</div>
+  <nav class="hidden md:flex">
+    <a href="#my-story" class="nav-link">My Story</a>
+    <a href="#ideas-in-action" class="nav-link">Core Expertise</a>
+    <a href="#whats-next" class="nav-link">What's Next</a>
+    <a href="#lets-connect" class="nav-link">Let's Connect</a>
+  </nav>
+  <div class="md:hidden">
+    <button id="mobile-menu-button" class="text-white font-bold">Menu</button>
+  </div>
+</header>
+
+<div id="mobile-menu" class="hidden flex-col items-center bg-[#0a0a1a] w-full absolute top-20 left-0 z-50 p-4 space-y-2 md:hidden">
+  <a href="#my-story" class="nav-link block text-center">My Story</a>
+  <a href="#ideas-in-action" class="nav-link block text-center">Core Expertise</a>
+  <a href="#whats-next" class="nav-link block text-center">What's Next</a>
+  <a href="#lets-connect" class="nav-link block text-center">Let's Connect</a>
+</div>
+
+<!-- Landing Section -->
+<section id="home" class="section h-screen">
+  <div class="text-center relative z-10">
+    <h1 class="font-teko text-4xl sm:text-5xl md:text-7xl lg:text-9xl font-bold tracking-wider leading-tight text-white">ADEELA KHAN</h1>
+    <p class="text-sm sm:text-base md:text-xl lg:text-3xl text-gray-300 mt-2 font-light uppercase tracking-[0.1em] text-center">AI Strategist & Digital Transformation Leader</p>
+  </div>
+  <div id="agentic-core-container" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full opacity-50"></div>
+</section>
+
+<!-- My Story Section -->
+<section id="my-story" class="section">
+  <div class="max-w-4xl mx-auto">
+    <h2 class="professional-font-bold text-4xl sm:text-5xl md:text-6xl text-center mb-12 text-white">Journey & Highlights</h2>
+    <p class="text-gray-200 text-center mb-6">Certified MIT Digital Transformation expert & Wharton-trained leader, with 20+ years of global IT leadership driving AI acceleration, digital enablement, and enterprise transformation. I’ve shaped business solutions & IP portfolios across Government, Healthcare, Energy, Finance, Space & Manufacturing, helping organizations unlock value by aligning AI-driven innovation with strategic priorities.As a trusted advisor to CxO leaders, I bring business case rigor & portfolio ROI discipline to executive decision-making, while scaling AI adoption, digital transformation, and innovation ecosystems. Skilled in SAFe Lean Portfolio & Product Management, Agile, and Scrum, I lead global portfolios that deliver growth, strengthen client partnerships, and drive measurable business impact.</p>
+    <div class="glass-card p-6 sm:p-8">
+      <h3 class="text-2xl sm:text-3xl font-bold mb-4 text-center text-cyan-300 professional-font-bold">Key Highlights</h3>
+      <ul class="text-gray-300 space-y-4 text-sm sm:text-base">
+        <li><strong>CGI Inc. - Director Global Intelligent Solutions & Innovation (2020-Present)</strong><br>Drive innovation and sustainable growth across CGI's global business, co-developing enterprise-wide AI strategy.</li>
+        <li><strong>CGI Inc. - Director Consulting Services (2015-2020)</strong><br>Consistently achieved 15-20% revenue growth and gross margin increases.</li>
+      </ul>
+    </div>
+    <div class="glass-card p-6 sm:p-8">
+      <h3 class="text-2xl sm:text-3xl font-bold mb-4 text-center text-cyan-300 professional-font-bold">Certifications & Training</h3>
+      <ul class="text-gray-300 space-y-4 text-sm sm:text-base">
+        <li><strong>Wharton - University of Pennsylvania:</strong> AI Strategy & Governance Certification (2024), Leading a Tech-Driven Org Certification (2023).</li>
+        <li><strong>MIT - Massachusetts Institute of Technology:</strong> Digital Transformation - Certified in Blockchain, AI, ML, Cloud, IoT, and RPA (2019).</li>
+        <li><strong>Vanderbilt University:</strong> Agentic AI and AI Agents for Leaders - Specialization (2025).</li>
+        <li><strong>Wharton - University of Pennsylvania:</strong> AI for Business - Specialization [In-Progress] (2025).</li>
+      </ul>
+      <p class="text-gray-400 text-sm italic mt-4">For my full list of accomplishments, please refer to my LinkedIn profile.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Core Expertise Section -->
+<section id="ideas-in-action" class="section">
+  <div class="max-w-6xl mx-auto">
+    <h2 class="professional-font-bold text-4xl sm:text-5xl md:text-6xl text-center mb-6 text-white">Core Expertise: Accelerating Innovation</h2>
+    <p class="text-center max-w-3xl mx-auto mb-12 text-gray-300 text-sm sm:text-base">My insights translate into tangible, AI-enabled solutions that drive business growth by balancing ethical oversight, IP protection, and rapid innovation.</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
+      <div class="glass-card p-6">
+        <h3 class="text-xl sm:text-2xl font-bold mb-4 text-cyan-300 professional-font-bold">AI Governance Frameworks</h3>
+        <p class="text-gray-300 text-sm sm:text-base">Architect AI governance frameworks that enable velocity without sacrificing accountability.</p>
+      </div>
+      <div class="glass-card p-6">
+        <h3 class="text-xl sm:text-2xl font-bold mb-4 text-cyan-300 professional-font-bold">Agentic AI Accelerators</h3>
+        <p class="text-gray-300 text-sm sm:text-base">Drive AI platform thinking by establishing reusable AI agent accelerators linked to delivery and business metrics.</p>
+      </div>
+      <div class="glass-card p-6">
+        <h3 class="text-xl sm:text-2xl font-bold mb-4 text-cyan-300 professional-font-bold">Strategic Co-Creation</h3>
+        <p class="text-gray-300 text-sm sm:text-base">Lead AI workshops to operationalize agentic AI with embedded trust, governance, and scalability. Champion cross-functional collaboration rituals to co-create scalable AI solutions.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- What's Next Section -->
+<section id="whats-next" class="section">
+  <div class="max-w-4xl mx-auto">
+    <h2 class="professional-font-bold text-4xl sm:text-5xl md:text-6xl text-center mb-6 text-white">What's Next</h2>
+    <p class="text-center max-w-3xl mx-auto mb-8 text-gray-300 text-sm sm:text-base">I'm currently working on several projects that will shape the future of digital transformation and AI leadership.</p>
+    <div class="space-y-8 max-w-3xl mx-auto">
+      <div class="glass-card p-6 sm:p-8">
+        <h3 class="text-2xl sm:text-3xl font-bold mb-2 text-cyan-300 professional-font-bold">Upcoming Book</h3>
+        <p class="text-gray-300 text-sm sm:text-base">I'm excited to announce my upcoming book, <em>[Placeholder Title: "Surprise"]</em>. It will serve as a professional manifesto, diving deep into the themes of ethical AI, strategic innovation, and the future of work.</p>
+      </div>
+      <div class="glass-card p-6 sm:p-8">
+        <h3 class="text-2xl sm:text-3xl font-bold mb-2 text-cyan-300 professional-font-bold">Future Initiatives</h3>
+        <p class="text-gray-300 text-sm sm:text-base">Stay tuned for new service offerings and my upcoming speaking engagements at industry events.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Let's Connect Section -->
+<section id="lets-connect" class="section">
+  <div class="max-w-2xl mx-auto text-center">
+    <h2 class="professional-font-bold text-4xl sm:text-5xl md:text-6xl mb-4 text-white">Let's Connect</h2>
+    <p class="text-lg text-gray-300 mb-8">I'm always open to new connections & collaborations. Please feel free to reach out.</p>
+    <div class="mb-12 space-y-4 text-lg">
+      <p><strong>LinkedIn:</strong> <a href="https://www.linkedin.com/in/akhan01" target="_blank" class="text-cyan-400 hover:text-white transition-colors duration-300">www.linkedin.com/in/akhan01</a></p>
+    </div>
+  </div>
+</section>
+
+<script src="script.js"></script>
+</body>
+</html>
