@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-  // --- Mobile Menu Toggle ---
+  // --- Mobile Menu Toggle (all screens) ---
   const mobileMenuButton = document.getElementById('mobile-menu-button');
   const mobileMenu = document.getElementById('mobile-menu');
   const navLinks = document.querySelectorAll('#mobile-menu a, nav a');
@@ -8,15 +8,11 @@ document.addEventListener('DOMContentLoaded', () => {
   mobileMenuButton.addEventListener('click', () => {
     mobileMenu.classList.toggle('hidden');
   });
-
-  // Close menu after clicking a link
   navLinks.forEach(link => {
     link.addEventListener('click', () => {
       mobileMenu.classList.add('hidden');
     });
   });
-
-  // --- Smooth Scrolling (works everywhere) ---
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function(e) {
       e.preventDefault();
@@ -25,163 +21,136 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // --- Background Particles Animation ---
-  const bgCanvas = document.getElementById('bg-canvas');
-  const bgCtx = bgCanvas.getContext('2d');
-  let particles = [];
-
-  function resizeCanvas() {
-    bgCanvas.width = window.innerWidth;
-    bgCanvas.height = window.innerHeight;
-  }
-  resizeCanvas();
-  window.addEventListener('resize', resizeCanvas);
-
-  class Particle {
-    constructor(x, y, r, color, v) {
-      this.x = x; this.y = y; this.r = r; this.color = color; this.v = v;
-    }
-    draw() {
-      bgCtx.beginPath();
-      bgCtx.arc(this.x, this.y, this.r, 0, 2*Math.PI);
-      bgCtx.fillStyle = this.color;
-      bgCtx.fill();
-    }
-    update() {
-      this.x += this.v.x;
-      this.y += this.v.y;
-      if(this.x < 0 || this.x > bgCanvas.width) this.x = Math.random()*bgCanvas.width;
-      if(this.y < 0 || this.y > bgCanvas.height) this.y = Math.random()*bgCanvas.height;
-      this.draw();
-    }
-  }
-
-  particles = [];
-  for(let i=0;i<50;i++){
-    particles.push(new Particle(
-      Math.random()*bgCanvas.width,
-      Math.random()*bgCanvas.height,
-      Math.random()*1.5,
-      `rgba(0,255,255,${Math.random()*0.4})`,
-      {x:(Math.random()-0.5)*0.25, y:(Math.random()-0.5)*0.25}
-    ));
-  }
-
-  function animateParticles() {
-    requestAnimationFrame(animateParticles);
-    bgCtx.clearRect(0,0,bgCanvas.width,bgCanvas.height);
-    particles.forEach(p => p.update());
-  }
-  animateParticles();
-
-  // --- Timeline Scroll Animation ---
-  const timelineItems = document.querySelectorAll('.timeline-item');
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if(entry.isIntersecting) entry.target.classList.add('visible');
-    });
-  }, { threshold: 0.2 });
-  timelineItems.forEach(item => observer.observe(item));
-
   // --- Agentic AI 3D Core ---
   const container = document.getElementById('agentic-core-container');
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(75, container.clientWidth/container.clientHeight, 0.1, 1000);
+  const camera = new THREE.PerspectiveCamera(70, container.clientWidth/container.clientHeight, 0.1, 2000);
   const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
   renderer.setSize(container.clientWidth, container.clientHeight);
   renderer.setPixelRatio(window.devicePixelRatio);
   container.appendChild(renderer.domElement);
 
-  camera.position.z = 9;
+  camera.position.z = 15;
 
-  // Core (bigger, high res)
-  const geometry = new THREE.IcosahedronGeometry(3, 4);
-  const material = new THREE.MeshStandardMaterial({
+  // Postprocessing for glow
+  const composer = new THREE.EffectComposer(renderer);
+  const renderPass = new THREE.RenderPass(scene, camera);
+  composer.addPass(renderPass);
+  const bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+  bloomPass.threshold = 0;
+  bloomPass.strength = 2.0;
+  bloomPass.radius = 0.5;
+  composer.addPass(bloomPass);
+
+  // Digital Core (Wireframe)
+  const coreGeometry = new THREE.IcosahedronGeometry(3, 3);
+  const coreMaterial = new THREE.MeshBasicMaterial({
     color: 0x00ffff,
-    metalness: 0.8,
-    roughness: 0.15,
-    emissive: 0x0077ff,
-    emissiveIntensity: 0.8,
-    wireframe: false
-  });
-  const core = new THREE.Mesh(geometry, material);
-  scene.add(core);
-
-  // Orbiting Agent Nodes
-  const agentNodes = [];
-  const nodeGeometry = new THREE.SphereGeometry(0.3, 32, 32);
-
-  for (let i = 0; i < 8; i++) {
-    const nodeMaterial = new THREE.MeshStandardMaterial({
-      color: 0xff00ff,
-      emissive: 0xaa00ff,
-      emissiveIntensity: 1
-    });
-    const node = new THREE.Mesh(nodeGeometry, nodeMaterial);
-    node.position.set(
-      Math.cos(i * Math.PI / 4) * 5,
-      Math.sin(i * Math.PI / 4) * 5,
-      0
-    );
-    scene.add(node);
-    agentNodes.push({ mesh: node, angle: i * Math.PI / 4, material: nodeMaterial });
-  }
-
-  // Lines from core to nodes
-  const lines = [];
-  const lineMaterial = new THREE.LineBasicMaterial({
-    color: 0x00ffff,
+    wireframe: true,
     transparent: true,
     opacity: 0.6
   });
+  const core = new THREE.Mesh(coreGeometry, coreMaterial);
+  scene.add(core);
 
+  // Inner pulsing sphere
+  const innerCoreGeometry = new THREE.SphereGeometry(1.2, 64, 64);
+  const innerCoreMaterial = new THREE.MeshStandardMaterial({
+    emissive: 0x0040ff,
+    emissiveIntensity: 1.5,
+    color: 0x111111,
+    metalness: 0.8,
+    roughness: 0.2
+  });
+  const innerCore = new THREE.Mesh(innerCoreGeometry, innerCoreMaterial);
+  scene.add(innerCore);
+
+  // Orbiting Agent Nodes
+  const agentNodes = [];
+  const nodeGeometry = new THREE.SphereGeometry(0.4, 64, 64);
+
+  for (let i = 0; i < 10; i++) {
+    const nodeMaterial = new THREE.MeshStandardMaterial({
+      emissive: new THREE.Color(`hsl(${Math.random()*360}, 100%, 50%)`),
+      emissiveIntensity: 2,
+      metalness: 0.7,
+      roughness: 0.3
+    });
+    const node = new THREE.Mesh(nodeGeometry, nodeMaterial);
+    node.position.set(
+      Math.cos(i * Math.PI/5) * 7,
+      Math.sin(i * Math.PI/5) * 7,
+      (Math.random()-0.5) * 4
+    );
+    scene.add(node);
+    agentNodes.push({ mesh: node, angle: i * 0.6, material: nodeMaterial });
+  }
+
+  // Lines (digital signal beams)
+  const lines = [];
   agentNodes.forEach(nodeObj => {
     const points = [core.position.clone(), nodeObj.mesh.position.clone()];
     const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
-    const line = new THREE.Line(lineGeometry, lineMaterial.clone());
+    const lineMaterial = new THREE.ShaderMaterial({
+      transparent: true,
+      uniforms: {
+        time: { value: 0 },
+        color1: { value: new THREE.Color(0x00ffff) },
+        color2: { value: new THREE.Color(0xff00ff) }
+      },
+      vertexShader: `
+        varying vec3 vPos;
+        void main() {
+          vPos = position;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float time;
+        uniform vec3 color1;
+        uniform vec3 color2;
+        varying vec3 vPos;
+        void main() {
+          float t = abs(sin(time + vPos.x*0.1));
+          vec3 color = mix(color1, color2, t);
+          gl_FragColor = vec4(color, 0.8);
+        }
+      `
+    });
+    const line = new THREE.Line(lineGeometry, lineMaterial);
     scene.add(line);
     lines.push({ line, node: nodeObj });
   });
 
   // Lights
-  scene.add(new THREE.PointLight(0x00ffff, 2, 100).position.set(5,5,5));
-  scene.add(new THREE.PointLight(0xff00ff, 2, 100).position.set(-5,-5,5));
+  const pointLight = new THREE.PointLight(0x00ffff, 3, 100);
+  pointLight.position.set(10,10,10);
+  scene.add(pointLight);
   scene.add(new THREE.AmbientLight(0xffffff, 0.3));
 
-  // Drag Interaction
-  let isDragging = false;
-  let previousMousePosition = {x:0,y:0};
+  // Animate
+  let clock = new THREE.Clock();
+  function animate(){
+    requestAnimationFrame(animate);
 
-  container.addEventListener('mousedown',()=>{isDragging=true;});
-  container.addEventListener('mouseup',()=>{isDragging=false;});
-  container.addEventListener('mouseleave',()=>{isDragging=false;});
-  container.addEventListener('mousemove',(e)=>{
-    if(!isDragging) return;
-    const deltaMove = {x: e.offsetX-previousMousePosition.x, y:e.offsetY-previousMousePosition.y};
-    core.rotation.y += deltaMove.x*0.005;
-    core.rotation.x += deltaMove.y*0.005;
-    previousMousePosition = {x:e.offsetX, y:e.offsetY};
-  });
+    const t = clock.getElapsedTime();
 
-  // Animation Loop
-  let signalTimer = 0;
-  function animateCore(){
-    requestAnimationFrame(animateCore);
-
-    if(!isDragging){
-      core.rotation.x += 0.0015;
-      core.rotation.y += 0.002;
-    }
+    // Core rotations
+    core.rotation.x += 0.001;
+    core.rotation.y += 0.002;
+    innerCore.material.emissiveIntensity = 1.5 + Math.sin(t*2)*0.5;
 
     // Orbit nodes
     agentNodes.forEach((nodeObj, i) => {
-      nodeObj.angle += 0.002 + i*0.0002;
-      nodeObj.mesh.position.x = Math.cos(nodeObj.angle) * 5;
-      nodeObj.mesh.position.z = Math.sin(nodeObj.angle) * 5;
+      nodeObj.angle += 0.002 + i*0.0003;
+      nodeObj.mesh.position.x = Math.cos(nodeObj.angle) * 7;
+      nodeObj.mesh.position.z = Math.sin(nodeObj.angle) * 7;
+      nodeObj.material.emissive.setHSL((Math.sin(t + i) * 0.5 + 0.5), 1, 0.5); // gradient pulse
     });
 
-    // Update lines
+    // Update lines (dynamic movement)
     lines.forEach(l => {
+      l.line.material.uniforms.time.value = t*3;
       const positions = new Float32Array([
         core.position.x, core.position.y, core.position.z,
         l.node.mesh.position.x, l.node.mesh.position.y, l.node.mesh.position.z
@@ -189,26 +158,16 @@ document.addEventListener('DOMContentLoaded', () => {
       l.line.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     });
 
-    // Simulate "signals" pulsing between core <-> nodes
-    signalTimer++;
-    if(signalTimer % 200 === 0){
-      const randomNode = agentNodes[Math.floor(Math.random()*agentNodes.length)];
-      randomNode.material.color.setHex(0x00ffff); // temporarily change color
-      randomNode.material.emissive.setHex(0x00ffff);
-      setTimeout(()=>{
-        randomNode.material.color.setHex(0xff00ff);
-        randomNode.material.emissive.setHex(0xaa00ff);
-      }, 600);
-    }
-
-    renderer.render(scene,camera);
+    composer.render();
   }
-  animateCore();
+  animate();
 
+  // Resize
   window.addEventListener('resize',()=>{
     camera.aspect = container.clientWidth/container.clientHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(container.clientWidth,container.clientHeight);
+    composer.setSize(container.clientWidth,container.clientHeight);
   });
 
 });
